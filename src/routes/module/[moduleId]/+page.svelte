@@ -1,17 +1,28 @@
 <script lang="ts">
-	import type { ExerciseMode, Module } from '$lib/types/module';
+	import { goto } from '$app/navigation';
+	import type { ExerciseMode, Module, ModuleCard } from '$lib/types/module';
 	import { shuffleCards } from '$lib/utils/cards';
 	import { currentExerciseCards, currentModule } from '../../../stores/exercise';
 
 	let { data: module }: { data: Module } = $props();
 
 	currentModule.set(module);
-	currentExerciseCards.set(shuffleCards(module.cards));
 
 	let mode = $state<ExerciseMode>('all');
+	let cardsForExercise = $derived(
+		shuffleCards(mode === 'all' ? [...module.cards] : getCardsCount(module.cards, Number(mode)))
+	);
 
 	function onModeChanges(e: Event) {
 		mode = (e.target as HTMLSelectElement).value as ExerciseMode;
+	}
+
+	function getCardsCount(cards: ModuleCard[], count: number) {
+		let newCards = [];
+		for (let i = 0; i < count; i++) {
+			newCards.push({ ...cards[Math.trunc(Math.random() * cards.length)] });
+		}
+		return newCards;
 	}
 </script>
 
@@ -40,12 +51,18 @@
 			<option value="500" selected={mode === '500'}> 500 questions </option>
 		</select>
 	</div>
-</form>
-<div>
-	<a class="mdf-button start" href="./{module.id}/questions"
-		>Start the exercise<span aria-hidden="true">&nbsp;📚</span></a
+
+	<button
+		class="mdf-button start"
+		type="submit"
+		onclick={() => {
+			currentExerciseCards.set(cardsForExercise);
+			setTimeout(() => {
+				goto(`./${module.id}/questions`);
+			});
+		}}>Start the exercise<span aria-hidden="true">&nbsp;📚</span></button
 	>
-</div>
+</form>
 
 <table>
 	<caption class="caption">List of questions in this exercise :</caption>
@@ -72,7 +89,7 @@
 	}
 
 	.start {
-		display: inline-block;
+		display: block;
 		margin: 1rem 0;
 	}
 

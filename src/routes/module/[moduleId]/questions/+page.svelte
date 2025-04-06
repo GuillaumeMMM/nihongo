@@ -13,9 +13,7 @@
 
 	currentModule.subscribe((m) => {
 		if (!m) {
-			const destination = location.pathname.split('/');
-			destination.pop();
-			goto(destination.join('/'));
+			goto('/');
 		}
 		module = m;
 	});
@@ -25,7 +23,7 @@
 	});
 
 	let currentQIndex = $state(0);
-	let currentCard = $derived(exerciseCards[currentQIndex]);
+	let currentCard = $derived<ModuleCard | undefined>(exerciseCards[currentQIndex]);
 	let moduleDescription = $derived(
 		module?.meta.types.find((t) => t.id === module?.type)?.description
 	);
@@ -53,8 +51,8 @@
 		isWrong = !isCorrectAnswer(currentCard, typedValue);
 
 		answersRecap.push({
-			q: currentCard.q,
-			a: currentCard.a,
+			q: currentCard?.q || '',
+			a: currentCard?.a || [],
 			isCorrect: !isWrong
 		});
 
@@ -72,8 +70,8 @@
 		typedValue = '';
 	}
 
-	function isCorrectAnswer(card: ModuleCard, a: string) {
-		return card.a.map((answer) => answer.toLowerCase()).includes(a.toLowerCase());
+	function isCorrectAnswer(card: ModuleCard | undefined, a: string) {
+		return card?.a.map((answer) => answer.toLowerCase()).includes(a.toLowerCase());
 	}
 
 	function nextQ() {
@@ -97,7 +95,7 @@
 		{moduleDescription}
 	</div>
 	<div class="question-container">
-		<div class="question">{currentCard.q}</div>
+		<div class="question">{currentCard?.q}</div>
 		<form onsubmit={onSubmitForm}>
 			<div class="form-row">
 				<input
@@ -114,7 +112,7 @@
 					autocapitalize="off"
 					aria-hidden={isWrong ? 'true' : undefined}
 					class={`mdf-input ${isWrong ? 'visually-hidden' : ''}`}
-					aria-label="${`Question : ${currentCard.q}`}"
+					aria-label="${`Question : ${currentCard?.q}`}"
 				/>
 				<button
 					class={`mdf-button ${isWrong ? 'full-button' : undefined}`}
@@ -137,9 +135,9 @@
 				{#if isWrong}
 					<p class="error">
 						Wrong answer. You should have typed
-						<span class="mdf-emphasis">{currentCard.a[0]}</span>.
+						<span class="mdf-emphasis">{currentCard?.a[0]}</span>.
 					</p>
-					{#if currentCard.indication}
+					{#if currentCard?.indication}
 						<p class="indication">Indication : {currentCard.indication}</p>
 					{/if}
 				{/if}
