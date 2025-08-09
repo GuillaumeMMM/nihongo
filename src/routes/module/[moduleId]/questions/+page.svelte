@@ -32,8 +32,8 @@ const moduleDescription = $derived(
 let typedValue = $state("");
 let isWrong = $state(false);
 const isLastQ = $derived(currentQIndex === exerciseCards.length - 1);
-const submitButton: HTMLButtonElement | null = $state(null);
-const input: HTMLInputElement | null = $state(null);
+const submitButton: {current: HTMLButtonElement | null} = $state({current: null});
+const input: {current: HTMLInputElement | null} = $state({current: null});
 const answersRecap: Answer[] = [];
 
 function goToFinish() {
@@ -64,7 +64,7 @@ function onSubmitForm(event: Event) {
 	}
 
 	if (isWrong) {
-		submitButton?.focus();
+		submitButton.current?.focus();
 	} else {
 		nextQ();
 	}
@@ -81,7 +81,7 @@ function isCorrectAnswer(card: ModuleCard | undefined, a: string) {
 function nextQ() {
 	currentQIndex++;
 	isWrong = false;
-	input?.focus();
+	input.current?.focus();
 }
 </script>
 
@@ -106,7 +106,7 @@ function nextQ() {
 					type="text"
 					bind:value={typedValue}
 					tabIndex={isWrong ? -1 : undefined}
-					bind:this={input}
+					bind:this={input.current}
 					oninput={(e) => {
 						typedValue = (e.target as HTMLInputElement).value;
 					}}
@@ -121,7 +121,7 @@ function nextQ() {
 				<button
 					class={`mdf-button ${isWrong ? 'full-button' : undefined}`}
 					type={isWrong ? 'button' : 'submit'}
-					bind:this={submitButton}
+					bind:this={submitButton.current}
 					onclick={isWrong ? (isLastQ ? goToFinish : nextQ) : () => {}}
 				>
 					{#if isWrong}
