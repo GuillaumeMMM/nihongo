@@ -32,6 +32,6 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
-		"@guillaumemmm/marquedefabrique": "^1.0.5"
+		"@guillaumemmm/marquedefabrique": "^1.0.6"
 	}
 }

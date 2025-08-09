@@ -36,7 +36,7 @@
 	</div>
 	<ul class="modules">
 		{#each searchedModules as module}
-			<li>
+			<li class={module.type}>
 				<a href="/module/{module.id}/" class="mdf-link module">
 					<div class="badges">
 						{#each module.metaType?.tags as tag}
@@ -112,26 +112,65 @@
 		text-decoration: none;
 	}
 
-	li:nth-child(even) > .module {
-		background: var(--mdf-color-secondary-light);
-		background: linear-gradient(
-			28deg,
-			var(--mdf-color-secondary) 10%,
-			var(--mdf-color-secondary-light) 100%
-		);
-	}
-
-	li:nth-child(even) .badge {
-		background-color: var(--mdf-color-secondary-transparent);
-	}
-
-	li:nth-child(even) .decoration {
-		color: var(--mdf-color-secondary-transparent);
-	}
-
 	.module:hover {
 		background: var(--mdf-color-primary);
 		padding: 1rem 1.3rem;
+	}
+
+	.decoration {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		color: var(--mdf-color-primary-transparent);
+		font-size: 4rem;
+		line-height: 1;
+		transition: top ease-out 0.1s;
+	}
+
+	li.e2r {
+		& > .module {
+			background: var(--mdf-color-secondary-light);
+			background: linear-gradient(
+				28deg,
+				var(--mdf-color-secondary) 10%,
+				var(--mdf-color-secondary-light) 100%
+			);
+
+			&:hover {
+				background: var(--mdf-color-secondary);
+			}
+		}
+
+		.badge {
+			background-color: var(--mdf-color-secondary-transparent);
+		}
+
+		.decoration {
+			color: var(--mdf-color-secondary-transparent);
+		}
+	}
+
+	li.h2e {
+		& > .module {
+			background: var(--mdf-color-tertiary-light);
+			background: linear-gradient(
+				28deg,
+				var(--mdf-color-tertiary) 10%,
+				var(--mdf-color-tertiary-light) 100%
+			);
+
+			&:hover {
+				background: var(--mdf-color-tertiary);
+			}
+		}
+
+		.badge {
+			background-color: var(--mdf-color-tertiary-transparent);
+		}
+
+		.decoration {
+			color: var(--mdf-color-tertiary-transparent);
+		}
 	}
 
 	.module:hover .decoration {
@@ -149,16 +188,6 @@
 		padding: 2px 5px;
 		border-radius: 3px;
 		font-size: 0.75rem;
-	}
-
-	.decoration {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		color: var(--mdf-color-primary-transparent);
-		font-size: 4rem;
-		line-height: 1;
-		transition: top ease-out 0.1s;
 	}
 
 	.title-container {
