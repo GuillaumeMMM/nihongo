@@ -1,84 +1,88 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import type { Answer, Module, ModuleCard } from '$lib/types/module';
+import { goto } from "$app/navigation";
+import type { Answer, Module, ModuleCard } from "$lib/types/module";
 
-	import {
-		currentExerciseAnswersRecap,
-		currentExerciseCards,
-		currentModule
-	} from '../../../../stores/exercise';
+import {
+	currentExerciseAnswersRecap,
+	currentExerciseCards,
+	currentModule,
+} from "../../../../stores/exercise";
 
-	let module = $state<Module>();
-	let exerciseCards = $state<Module['cards']>([]);
+let module = $state<Module>();
+let exerciseCards = $state<Module["cards"]>([]);
 
-	currentModule.subscribe((m) => {
-		if (!m) {
-			goto('/');
-		}
-		module = m;
+currentModule.subscribe((m) => {
+	if (!m) {
+		goto("/");
+	}
+	module = m;
+});
+
+currentExerciseCards.subscribe((c) => {
+	exerciseCards = c;
+});
+
+let currentQIndex = $state(0);
+const currentCard = $derived<ModuleCard | undefined>(
+	exerciseCards[currentQIndex],
+);
+const moduleDescription = $derived(
+	module?.meta.types.find((t) => t.id === module?.type)?.description,
+);
+let typedValue = $state("");
+let isWrong = $state(false);
+const isLastQ = $derived(currentQIndex === exerciseCards.length - 1);
+const submitButton: HTMLButtonElement | null = $state(null);
+const input: HTMLInputElement | null = $state(null);
+const answersRecap: Answer[] = [];
+
+function goToFinish() {
+	currentExerciseAnswersRecap.set(answersRecap);
+	const destination = location.pathname.split("/");
+	destination.pop();
+	destination.push("finished");
+	goto(destination.join("/"));
+}
+
+function onSubmitForm(event: Event) {
+	event.preventDefault();
+	if (typedValue.trim().length === 0 || isWrong) {
+		return;
+	}
+
+	isWrong = !isCorrectAnswer(currentCard, typedValue);
+
+	answersRecap.push({
+		q: currentCard?.q || "",
+		a: currentCard?.a || [],
+		isCorrect: !isWrong,
 	});
 
-	currentExerciseCards.subscribe((c) => {
-		exerciseCards = c;
-	});
-
-	let currentQIndex = $state(0);
-	let currentCard = $derived<ModuleCard | undefined>(exerciseCards[currentQIndex]);
-	let moduleDescription = $derived(
-		module?.meta.types.find((t) => t.id === module?.type)?.description
-	);
-	let typedValue = $state('');
-	let isWrong = $state(false);
-	let isLastQ = $derived(currentQIndex === exerciseCards.length - 1);
-	let submitButton: HTMLButtonElement | null = $state(null);
-	let input: HTMLInputElement | null = $state(null);
-	let answersRecap: Answer[] = [];
-
-	function goToFinish() {
-		currentExerciseAnswersRecap.set(answersRecap);
-		const destination = location.pathname.split('/');
-		destination.pop();
-		destination.push('finished');
-		goto(destination.join('/'));
+	if (isLastQ && !isWrong) {
+		goToFinish();
+		return;
 	}
 
-	function onSubmitForm(event: Event) {
-		event.preventDefault();
-		if (typedValue.trim().length === 0 || isWrong) {
-			return;
-		}
-
-		isWrong = !isCorrectAnswer(currentCard, typedValue);
-
-		answersRecap.push({
-			q: currentCard?.q || '',
-			a: currentCard?.a || [],
-			isCorrect: !isWrong
-		});
-
-		if (isLastQ && !isWrong) {
-			goToFinish();
-			return;
-		}
-
-		if (isWrong) {
-			submitButton?.focus();
-		} else {
-			nextQ();
-		}
-
-		typedValue = '';
+	if (isWrong) {
+		submitButton?.focus();
+	} else {
+		nextQ();
 	}
 
-	function isCorrectAnswer(card: ModuleCard | undefined, a: string) {
-		return card?.a.map((answer) => answer.toLowerCase()).includes(a.toLowerCase());
-	}
+	typedValue = "";
+}
 
-	function nextQ() {
-		currentQIndex++;
-		isWrong = false;
-		input?.focus();
-	}
+function isCorrectAnswer(card: ModuleCard | undefined, a: string) {
+	return card?.a
+		.map((answer) => answer.toLowerCase())
+		.includes(a.toLowerCase());
+}
+
+function nextQ() {
+	currentQIndex++;
+	isWrong = false;
+	input?.focus();
+}
 </script>
 
 <svelte:head>
@@ -159,11 +163,6 @@
 	.form-row {
 		display: flex;
 		align-items: center;
-	}
-
-	.form-row > input {
-		border-top-right-radius: 0;
-		border-bottom-right-radius: 0;
 	}
 
 	.form-row > .mdf-button:not(.full-button) {
