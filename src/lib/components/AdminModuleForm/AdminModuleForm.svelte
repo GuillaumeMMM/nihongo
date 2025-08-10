@@ -11,11 +11,15 @@
 			id: '',
 			cards: [{ q: '', a: [''] }],
 			sign: '',
-			type: ''
+			type: 'alpha'
 		}
 	});
 
+	let formError = $state<string[]>([]);
+
 	function updateForm(updatedForm: { module: Omit<Module, 'meta'>; token?: string }) {
+		formError = [];
+
 		isJSONInvalid = false;
 		form = { ...updatedForm };
 	}
@@ -119,6 +123,14 @@
 	}
 
 	async function onDeleteModule() {
+		if (!form.token) {
+			formError = ['missing token'];
+		}
+
+		if (formError.length > 0) {
+			return;
+		}
+
 		await fetch('https://guillaume--3acdb340760011f0afa40224a6c84d84.web.val.run', {
 			method: 'DELETE',
 			body: JSON.stringify({
@@ -129,6 +141,20 @@
 	}
 
 	async function onSubmit() {
+		if (!form.token) {
+			formError = ['missing token'];
+		}
+		if (!form.module.name) {
+			formError = [...formError, 'missing module name'];
+		}
+		if (form.module.cards.length === 0) {
+			formError = [...formError, 'missing question'];
+		}
+
+		if (formError.length > 0) {
+			return;
+		}
+
 		await fetch('https://guillaume--3acdb340760011f0afa40224a6c84d84.web.val.run', {
 			method: 'PUT',
 			body: JSON.stringify({
@@ -143,6 +169,11 @@
 </script>
 
 <form onsubmit={onSubmit}>
+	{#if formError.length > 0}
+		{#each formError as error}
+			<div class="mdf-block mdf-block-error form-error-block">{error}</div>
+		{/each}
+	{/if}
 	<div class="mdf-input-control token-control">
 		<label for="token">Token</label>
 		<input
@@ -253,6 +284,10 @@
 		width: 100%;
 	}
 
+	.form-error-block {
+		margin: 1rem 0;
+	}
+
 	.token-control {
 		margin: 1rem 0;
 	}
@@ -285,7 +320,7 @@
 	}
 
 	.error {
-		margin-top: 0.5rem;
+		margin-top: 1rem;
 	}
 
 	.submit-container {
