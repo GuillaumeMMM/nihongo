@@ -48,7 +48,7 @@
 			<option value="20" selected={mode === '20'}> 20 questions </option>
 			<option value="100" selected={mode === '100'}> 100 questions </option>
 			<option value="200" selected={mode === '200'}> 200 questions </option>
-			<option value="500" selected={mode === '500'}> 500 questions </option>
+			<option value="500" selected={mode === '500'}> Take the test! </option>
 		</select>
 	</div>
 

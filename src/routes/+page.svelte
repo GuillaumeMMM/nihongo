@@ -14,24 +14,26 @@
 	<meta name="description" content="Japanese exercises" />
 </svelte:head>
 
-<h1 class="mdf-title1">Exercises</h1>
-<div>
-	<div class="search-container">
-		<label for="search-input">Search for an exercise</label>
-		<div class="search-input">
-			<span aria-hidden="true" class="search-icon">🔎</span>
-			<input
-				id="search-input"
-				type="search"
-				placeholder="Search"
-				bind:value={search}
-				oninput={(e) => {
-					search = (e.target as HTMLInputElement)?.value || '';
-				}}
-				autocomplete="off"
-				autocorrect="off"
-				class="mdf-input"
-			/>
+<div class="container">
+	<h1 class="mdf-title1">Exercises</h1>
+	<div>
+		<div class="search-container">
+			<label for="search-input">Search for an exercise</label>
+			<div class="search-input">
+				<span aria-hidden="true" class="search-icon">🔎</span>
+				<input
+					id="search-input"
+					type="search"
+					placeholder="Search"
+					bind:value={search}
+					oninput={(e) => {
+						search = (e.target as HTMLInputElement)?.value || '';
+					}}
+					autocomplete="off"
+					autocorrect="off"
+					class="mdf-input"
+				/>
+			</div>
 		</div>
 	</div>
 	<ul class="modules">
@@ -66,25 +68,26 @@
 			</li>
 		{/each}
 	</ul>
-	{#if searchedModules.length === 0}
-		<p class="no-result">No exercise was found for your search.</p>
-		<button
-			type="button"
-			class="mdf-button"
-			onclick={() => {
-				search = '';
-			}}
-		>
-			Reset the search
-		</button>
-	{/if}
+	<div>
+		{#if searchedModules.length === 0}
+			<p class="no-result">No exercise was found for your search.</p>
+			<button
+				type="button"
+				class="mdf-button"
+				onclick={() => {
+					search = '';
+				}}
+			>
+				Reset the search
+			</button>
+		{/if}
+	</div>
 </div>
 
 <style>
 	.modules {
 		display: flex;
 		flex-wrap: wrap;
-		max-width: 1200px;
 		gap: 1rem;
 		margin: 1rem 0;
 	}

@@ -1,11 +1,17 @@
 <script lang="ts">
+	import Sidebar from '$lib/components/sidebar.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
 </script>
 
 <main class="container">
-	{@render children()}
+	<div class="sidebar">
+		<Sidebar />
+	</div>
+	<div class="content">
+		{@render children()}
+	</div>
 </main>
 
 <style>
@@ -26,9 +32,33 @@
 	}
 
 	.container {
+		display: flex;
+		gap: 2rem;
+		flex-direction: column;
+		position: relative;
 		padding: 1rem;
 		min-height: 100vh;
-		max-width: 75rem;
+		max-width: 90rem;
 		margin: 0 auto;
+
+		.sidebar {
+			top: 1rem;
+			left: 0;
+			height: fit-content;
+		}
+
+		.content {
+			flex: 1;
+		}
+	}
+
+	@media screen and (min-width: 63rem) {
+		.container {
+			flex-direction: row;
+		}
+
+		.sidebar {
+			position: sticky;
+		}
 	}
 </style>
