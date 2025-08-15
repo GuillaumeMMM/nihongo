@@ -1,12 +1,22 @@
 <script lang="ts">
+	import ExerciseStatus from '$lib/components/ExerciseStatus/ExerciseStatus.svelte';
 	import type { Module, ModuleType } from '$lib/types/module';
+	import { type User } from '$lib/types/user';
+	import { currentUser } from '../stores/user';
 
 	let { data }: { data: { modules: (Module & { metaType: ModuleType })[] } } = $props();
 
 	let search = $state('');
+	let user = $state<User | null>(null);
 	const searchedModules = $derived(
 		data.modules.filter((m) => m.name.toLowerCase().includes(search))
 	);
+
+	currentUser.subscribe((u) => {
+		user = u;
+	});
+
+	let userExercisesData = $derived(user?.data?.exercises || {});
 </script>
 
 <svelte:head>
@@ -38,6 +48,11 @@
 		{#each searchedModules as module}
 			<li class={module.type}>
 				<a href="/module/{module.id}/" class="mdf-link module">
+					{#if userExercisesData[module.id]}
+						<div class="module-status">
+							<ExerciseStatus rate={userExercisesData[module.id]?.answers || 0} />
+						</div>
+					{/if}
 					<div class="badges">
 						{#each module.metaType?.tags as tag}
 							<span class="badge">
@@ -51,6 +66,7 @@
 					<div class="decoration" aria-hidden="true">
 						{module.sign}
 					</div>
+
 					<div class="title-container">
 						<h2 class="module-title">{module.name}</h2>
 						<div class="arrow" aria-hidden="true">
@@ -115,6 +131,13 @@
 	.module:hover {
 		background: var(--mdf-color-primary);
 		padding: 1rem 1.3rem;
+	}
+
+	.module-status {
+		position: absolute;
+		top: 1rem;
+		left: 1rem;
+		line-height: 1;
 	}
 
 	.decoration {

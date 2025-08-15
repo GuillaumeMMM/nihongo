@@ -3,10 +3,17 @@
 	import type { ExerciseMode, Module, ModuleCard } from '$lib/types/module';
 	import { shuffleCards } from '$lib/utils/cards';
 	import { currentExerciseCards, currentModule } from '../../../stores/exercise';
+	import { currentUser } from '../../../stores/user';
 
 	let { data: module }: { data: Module } = $props();
 
 	currentModule.set(module);
+
+	let loggedIn = $state(false);
+
+	currentUser.subscribe((u) => {
+		loggedIn = Boolean(u);
+	});
 
 	let mode = $state<ExerciseMode>('all');
 	let cardsForExercise = $derived(
@@ -48,7 +55,9 @@
 			<option value="20" selected={mode === '20'}> 20 questions </option>
 			<option value="100" selected={mode === '100'}> 100 questions </option>
 			<option value="200" selected={mode === '200'}> 200 questions </option>
-			<option value="500" selected={mode === '500'}> 500 questions </option>
+			<option value="500" selected={mode === '500'}>
+				{loggedIn ? 'Take the test!' : '500 questions'}
+			</option>
 		</select>
 	</div>
 

@@ -7,11 +7,14 @@
 		currentExerciseCards,
 		currentModule
 	} from '../../../../stores/exercise';
+	import { currentUser, me } from '../../../../stores/user';
 
 	let module = $state<Module>();
 	let exerciseCards = $state<Module['cards']>([]);
 	let recapAggregated = $state<Map<string, { a: string[]; isCorrect: boolean[] }>>(new Map());
 	let correctCards = $state<Answer[]>([]);
+	let hasPostedAnswers = $state(false);
+	let loggedIn = $state(false);
 
 	currentModule.subscribe((m) => {
 		if (!m) {
@@ -22,12 +25,33 @@
 		module = m;
 	});
 
+	currentUser.subscribe((u) => {
+		loggedIn = Boolean(u);
+	});
+
 	currentExerciseCards.subscribe((c) => {
 		exerciseCards = c;
 	});
 
 	currentExerciseAnswersRecap.subscribe((answers) => {
 		correctCards = answers.filter((answer) => answer.isCorrect);
+
+		if (loggedIn && !hasPostedAnswers && answers.length === 500) {
+			void fetch(`https://guillaume-postjapuserexercise.web.val.run`, {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json'
+				},
+				body: JSON.stringify({
+					token: localStorage.getItem('token'),
+					exerciseId: module?.id,
+					answers: correctCards.length / answers.length
+				})
+			}).then(() => {
+				hasPostedAnswers = true;
+				me(currentUser.set);
+			});
+		}
 
 		const recapAggregatedTmp: Map<string, { a: string[]; isCorrect: boolean[] }> = new Map();
 		for (const answer of answers) {
