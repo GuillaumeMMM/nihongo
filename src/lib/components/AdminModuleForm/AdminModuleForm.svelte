@@ -1,18 +1,25 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { Module } from '$lib/types/module';
 
 	let { module }: { module?: Module } = $props();
 
 	let isJSONInvalid = $state(false);
 
-	let form = $derived<{ module: Omit<Module, 'meta'>; token?: string }>({
-		module: module || {
+	const DEFAULT_FORM = {
+		module: {
 			name: '',
 			id: '',
 			cards: [{ q: '', a: [''] }],
 			sign: '',
 			type: 'alpha'
-		}
+		},
+		token: localStorage.getItem('admin_token') || ''
+	};
+
+	let form = $derived<{ module: Omit<Module, 'meta'>; token?: string }>({
+		module: module || DEFAULT_FORM.module,
+		token: DEFAULT_FORM.token
 	});
 
 	let formError = $state<string[]>([]);
@@ -131,13 +138,19 @@
 			return;
 		}
 
-		await fetch('https://guillaume--3acdb340760011f0afa40224a6c84d84.web.val.run', {
-			method: 'DELETE',
-			body: JSON.stringify({
-				id: `${form.module.name.toLowerCase().split(' ').join('_')}_${form.module.type}`,
-				token: form.token
-			})
-		});
+		try {
+			await fetch('https://guillaume--3acdb340760011f0afa40224a6c84d84.web.val.run', {
+				method: 'DELETE',
+				body: JSON.stringify({
+					id: `${form.module.name.toLowerCase().split(' ').join('_')}_${form.module.type}`,
+					token: form.token
+				})
+			});
+
+			goto('/admin');
+		} catch {
+			formError = [...formError, 'something went wrong while deleting the module'];
+		}
 	}
 
 	async function onSubmit() {
@@ -155,16 +168,26 @@
 			return;
 		}
 
-		await fetch('https://guillaume--3acdb340760011f0afa40224a6c84d84.web.val.run', {
-			method: 'PUT',
-			body: JSON.stringify({
-				module: {
-					...form.module,
-					id: `${form.module.name.toLowerCase().split(' ').join('_')}_${form.module.type}`
-				},
-				token: form.token
-			})
-		});
+		try {
+			await fetch('https://guillaume--3acdb340760011f0afa40224a6c84d84.web.val.run', {
+				method: 'PUT',
+				body: JSON.stringify({
+					module: {
+						...form.module,
+						id: `${form.module.name.toLowerCase().split(' ').join('_')}_${form.module.type}`
+					},
+					token: form.token
+				})
+			});
+
+			localStorage.setItem('admin_token', form.token || '');
+
+			if (!module) {
+				updateForm({ ...DEFAULT_FORM });
+			}
+		} catch {
+			formError = [...formError, 'something went wrong while updating the module data'];
+		}
 	}
 </script>
 
@@ -274,9 +297,11 @@
 	</div>
 </form>
 
-<button type="button" class="mdf-button mdf-button-tertiary" onclick={onDeleteModule}
-	>Delete module</button
->
+{#if module}
+	<button type="button" class="mdf-button mdf-button-tertiary" onclick={onDeleteModule}
+		>Delete module</button
+	>
+{/if}
 
 <style>
 	.json-control,
